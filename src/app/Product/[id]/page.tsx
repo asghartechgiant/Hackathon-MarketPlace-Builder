@@ -19,7 +19,7 @@ interface Product {
   };
 }
 
-const ProductDetail = ({ params }: { params: { id: string } }) => {
+const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const cartContext = useContext(CartContext);
 
@@ -34,6 +34,7 @@ const ProductDetail = ({ params }: { params: { id: string } }) => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        const { id } = await params;
         const data = await client.fetch(
           `*[_type == "product" && _id == $id][0]{
             _id,
@@ -44,7 +45,7 @@ const ProductDetail = ({ params }: { params: { id: string } }) => {
             description,
             productImage
           }`,
-          { id: params.id }
+          { id: id }
         );
         setProduct(data);
       } catch (error) {
@@ -53,7 +54,10 @@ const ProductDetail = ({ params }: { params: { id: string } }) => {
     };
 
     fetchProduct();
-  }, [params.id]);
+  }, [
+    // @ts-expect-error id rerender every time
+    id,
+  ]);
 
   if (!product) {
     return (
