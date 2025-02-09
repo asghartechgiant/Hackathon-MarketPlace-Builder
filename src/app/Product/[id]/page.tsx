@@ -23,7 +23,6 @@ const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const cartContext = useContext(CartContext);
-  const router = useRouter();
 
   if (!cartContext) {
     throw new Error(
