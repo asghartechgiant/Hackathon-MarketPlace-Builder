@@ -14,6 +14,7 @@ const CheckoutPage = () => {
     country: "",
   });
   const [orderStatus, setOrderStatus] = useState("");
+  const [shipmentId, setShipmentId] = useState("");
   // const router = useRouter();
 
   const totalPrice = cart.reduce(
@@ -52,7 +53,10 @@ const CheckoutPage = () => {
       const data = await response.json();
       if (response.ok) {
         setOrderStatus("Order Placed Successfully!");
-        console.log(orderData, "Order data");
+        console.log(data, "Order data");
+
+        setShipmentId(data.shipmentId);
+
         // router.push("/thank-you");
       } else {
         setOrderStatus(`Failed to place order: ${data.error}`);
@@ -185,6 +189,12 @@ const CheckoutPage = () => {
               {orderStatus && (
                 <div className="mt-4 text-center text-sm font-medium text-teal-600">
                   {orderStatus}
+                </div>
+              )}
+
+              {shipmentId && (
+                <div className="mt-4 text-center text-sm font-medium text-teal-600">
+                  {shipmentId}
                 </div>
               )}
             </div>

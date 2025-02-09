@@ -19,7 +19,7 @@ interface Product {
   };
 }
 
-const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
+const ProductDetail = ({ params }: { params: { id: string } }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const cartContext = useContext(CartContext);
 
@@ -30,11 +30,11 @@ const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
   }
 
   const { addToCart } = cartContext;
+  const productId = params.id; // Extracting ID once
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { id } = await params;
         const data = await client.fetch(
           `*[_type == "product" && _id == $id][0]{
             _id,
@@ -45,7 +45,7 @@ const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
             description,
             productImage
           }`,
-          { id: id }
+          { id: productId }
         );
         setProduct(data);
       } catch (error) {
@@ -53,11 +53,10 @@ const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
       }
     };
 
-    fetchProduct();
-  }, [
-    // @ts-expect-error id rerender every time
-    id,
-  ]);
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]); // Now `productId` is properly tracked
 
   if (!product) {
     return (
@@ -112,7 +111,7 @@ const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
                   )}
                   {product.priceWithoutDiscount && (
                     <span className="ml-4 text-sm font-medium text-green-600">
-                      Save $
+                      Save ${" "}
                       {(product.priceWithoutDiscount - product.price).toFixed(
                         2
                       )}
@@ -199,7 +198,6 @@ const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
                       imageUrl: urlFor(product.productImage).url(),
                     });
 
-                    // Add this line to show an alert
                     alert(`${product.title} has been added to your cart!`);
                   }}
                   className="w-full bg-teal-600 text-white py-4 px-8 rounded-xl text-lg font-semibold hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02]"
